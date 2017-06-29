@@ -783,53 +783,263 @@ public class Solution {
 	public int maxArea(int[] height) {
 		int left = 0, right = height.length - 1;
 		int res = 0;
-		
+
 		while (left < right) {
 			res = Math.max(res, Math.min(height[left], height[right]) * (right - left));
-			if(height[left] < height[right]) left++;
-			else right--;
+			if (height[left] < height[right])
+				left++;
+			else
+				right--;
 		}
-		
+
 		return res;
 	}
+
+	public int trap(int[] height) {
+		int left = 0, right = height.length - 1;
+		int leftMax = 0, rightMax = 0;
+		int res = 0;
+
+		while (left < right) {
+			if (height[left] < height[right]) {
+				if (height[left] > leftMax)
+					leftMax = height[left];
+				else
+					res += leftMax - height[left];
+				left++;
+			} else {
+				if (height[right] > rightMax)
+					rightMax = height[right];
+				else
+					res += rightMax - height[right];
+				right--;
+			}
+		}
+
+		return res;
+	}
+
+	public List<Integer> getRow(int rowIndex) {
+		List<Integer> res = new ArrayList<>(rowIndex + 1);
+
+		res.add(1);
+
+		for (int i = 1; i <= rowIndex; i++) {
+			res.add(0);
+		}
+
+		for (int i = 0; i <= rowIndex; i++) {
+			for (int j = i; j > 0; j--) {
+				res.set(j, res.get(j - 1) + res.get(j));
+			}
+		}
+
+		return res;
+	}
+
+	public int triangleNumber(int[] nums) {
+		Arrays.sort(nums);
+		int n = nums.length;
+		int j = 1, k = n - 1;
+		int res = 0;
+
+		for (int i = n - 1; i > 1; i--) {
+			j = 0;
+			k = i - 1;
+			while (j < k) {
+				if (nums[j] + nums[k] > nums[i]) {
+					res += k - j;
+					k--;
+				} else
+					j++;
+			}
+		}
+
+		return res;
+	}
+
+	public int longestConsecutive(int[] nums) {
+		if (nums.length == 0)
+			return 0;
+
+		Arrays.sort(nums);
+
+		int res = 0;
+		int cur = 1;
+
+		for (int i = 1; i < nums.length; i++) {
+			if (nums[i] - nums[i - 1] == 1) {
+				cur++;
+			} else if (nums[i] == nums[i - 1]) {
+				continue;
+			} else {
+				res = res > cur ? res : cur;
+				cur = 1;
+			}
+		}
+
+		res = res > cur ? res : cur;
+
+		return res;
+	}
+
+	public int removeDuplicates(int[] nums) {
+		if (nums.length < 2)
+			return nums.length;
+
+		int res = 1;
+		int l = 1;
+
+		for (; l < nums.length; l++) {
+			if (nums[l - 1] != nums[l]) {
+				nums[res++] = nums[l];
+			} else
+				continue;
+		}
+
+		return res;
+	}
+
+	public int removeDuplicatesII(int[] nums) {
+		if (nums.length < 2)
+			return nums.length;
+
+		int res = 1;
+		int cur = 1;
+		int l = 1;
+
+		for (; l < nums.length; l++) {
+			if (nums[l - 1] != nums[l]) {
+				nums[res++] = nums[l];
+				cur = 1;
+			} else if (cur < 2) {
+				nums[res++] = nums[l];
+				cur++;
+			} else {
+				cur++;
+				continue;
+			}
+		}
+
+		return res;
+	}
+
+	public List<List<Integer>> subsetsWithDup(int[] nums) {
+		List<List<Integer>> res = new ArrayList<>();
+
+		List<Integer> n = new ArrayList<>();
+		res.add(n);
+
+		Arrays.sort(nums);
+
+		for (int i = 0; i < nums.length;) {
+			int cnt = 0;
+			while (i + cnt < nums.length && nums[i + cnt] == nums[i])
+				cnt++;
+			int curSize = res.size();
+			for (int j = 0; j < curSize; j++) {
+				List<Integer> cur = new ArrayList<>(res.get(j));
+				for (int k = 0; k < cnt; k++) {
+					cur.add(nums[i]);
+					res.add(new ArrayList<>(cur));
+				}
+			}
+			i += cnt;
+		}
+
+		return res;
+	}
+
+	public boolean searchMatrix(int[][] matrix, int target) {
+		int row = matrix.length;
+		if (row == 0)
+			return false;
+		int col = matrix[0].length;
+		if (col == 0)
+			return false;
+		int l = 0, r = row * col - 1;
+
+		while (l < r) {
+			int mid = (l + r - 1) >> 1;
+			if (matrix[mid / col][mid % col] < target)
+				l = mid + 1;
+			else
+				r = mid;
+		}
+
+		return matrix[r / col][r % col] == target;
+	}
+
+	public int[] twoSum(int[] nums, int target) {
+		Map<Integer, Integer> m = new HashMap<>();
+
+		for (int i = 0; i < nums.length; i++) {
+			if (m.containsKey(target - nums[i])) {
+				return new int[] { m.get(target - nums[i]), i };
+			}
+			m.put(nums[i], i);
+		}
+
+		return null;
+	}
+
+	public int minimumTotal(List<List<Integer>> triangle) {
+//		return minimumTotalHelper(Integer.MAX_VALUE, triangle.get(0).get(0), 1, 0, triangle);
+		
+		/**DP Solution*/
+		int n = triangle.size();
+		int[] dp = new int[n];
+		for(int i = 0; i < n; i++){
+			dp[i] = triangle.get(n - 1).get(i);
+		}
+		for(int layer = n - 2; layer >= 0; layer--){
+			for(int i = 0; i < layer + 1; i++){
+				dp[i] = Math.min(dp[i], dp[i + 1]) + triangle.get(layer).get(i);
+			}
+		}
+		return dp[0];
+	}
+
+	private int minimumTotalHelper(int min, int res, int cur, int pos, List<List<Integer>> triangle) {
+		if (cur == triangle.size()) {
+			if (res < min)	return res;
+			else	return min;
+		}
+
+		List<Integer> curList = triangle.get(cur);
+		res += curList.get(pos);
+		min = minimumTotalHelper(min, res, cur + 1, pos, triangle);
+
+		if (pos < curList.size() - 1) {
+			res = res - curList.get(pos) + curList.get(pos + 1);
+			min = minimumTotalHelper(min, res, cur + 1, pos + 1, triangle);
+		}
+
+		return min;
+	}
 	
-    public int trap(int[] height) {
-        int left = 0, right = height.length - 1;
-        int leftMax = 0, rightMax = 0;
-        int res = 0;
-        
-        while(left < right) {
-        	if(height[left] < height[right]){
-        		if(height[left] > leftMax) leftMax = height[left];
-        		else res += leftMax - height[left];
-        		left++;
-        	}
-        	else{
-        		if(height[right] > rightMax) rightMax = height[right];
-        		else res += rightMax - height[right];
-        		right--;
-        	}
-        }
-        
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> cur = new ArrayList<Integer>();
+        Arrays.sort(candidates);
+        combinationSum2Helper(candidates, target, 0, cur, res, 0);
         return res;
     }
     
-    public List<Integer> getRow(int rowIndex) {
-        List<Integer> res = new ArrayList<>(rowIndex + 1);
-                
-        res.add(1);
-        
-        for(int i = 1; i <= rowIndex; i++){
-        	res.add(0);
-        }
-        
-        for(int i = 0; i <= rowIndex; i++){
-        	for(int j = i; j > 0; j--){
-        		res.set(j, res.get(j - 1) + res.get(j));
-        	}
-        }
-        
-        return res;
-        
+    private void combinationSum2Helper(int[] candidates, int target, int sum, List<Integer> cur, List<List<Integer>> res, int pos){
+    	if(sum == target) {
+    		res.add(new ArrayList<Integer>(cur));
+    		return;
+    	}
+    	for(; pos < candidates.length; pos++){
+    		if(sum + candidates[pos] <= target){
+    			cur.add(candidates[pos]);
+    			combinationSum2Helper(candidates, target, sum + candidates[pos], cur, res, pos + 1);
+    			cur.remove(cur.size() - 1);
+    			while(pos + 1 < candidates.length && candidates[pos + 1] == candidates[pos]) pos++;
+    		}
+    		else
+    			return;
+    	}
     }
 }
