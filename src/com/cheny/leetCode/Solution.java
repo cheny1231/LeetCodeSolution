@@ -984,16 +984,17 @@ public class Solution {
 	}
 
 	public int minimumTotal(List<List<Integer>> triangle) {
-//		return minimumTotalHelper(Integer.MAX_VALUE, triangle.get(0).get(0), 1, 0, triangle);
-		
-		/**DP Solution*/
+		// return minimumTotalHelper(Integer.MAX_VALUE, triangle.get(0).get(0),
+		// 1, 0, triangle);
+
+		/** DP Solution */
 		int n = triangle.size();
 		int[] dp = new int[n];
-		for(int i = 0; i < n; i++){
+		for (int i = 0; i < n; i++) {
 			dp[i] = triangle.get(n - 1).get(i);
 		}
-		for(int layer = n - 2; layer >= 0; layer--){
-			for(int i = 0; i < layer + 1; i++){
+		for (int layer = n - 2; layer >= 0; layer--) {
+			for (int i = 0; i < layer + 1; i++) {
 				dp[i] = Math.min(dp[i], dp[i + 1]) + triangle.get(layer).get(i);
 			}
 		}
@@ -1002,8 +1003,10 @@ public class Solution {
 
 	private int minimumTotalHelper(int min, int res, int cur, int pos, List<List<Integer>> triangle) {
 		if (cur == triangle.size()) {
-			if (res < min)	return res;
-			else	return min;
+			if (res < min)
+				return res;
+			else
+				return min;
 		}
 
 		List<Integer> curList = triangle.get(cur);
@@ -1017,29 +1020,248 @@ public class Solution {
 
 		return min;
 	}
+
+	public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+		List<List<Integer>> res = new ArrayList<>();
+		List<Integer> cur = new ArrayList<Integer>();
+		Arrays.sort(candidates);
+		combinationSum2Helper(candidates, target, 0, cur, res, 0);
+		return res;
+	}
+
+	private void combinationSum2Helper(int[] candidates, int target, int sum, List<Integer> cur,
+			List<List<Integer>> res, int pos) {
+		if (sum == target) {
+			res.add(new ArrayList<Integer>(cur));
+			return;
+		}
+		for (; pos < candidates.length; pos++) {
+			if (sum + candidates[pos] <= target) {
+				cur.add(candidates[pos]);
+				combinationSum2Helper(candidates, target, sum + candidates[pos], cur, res, pos + 1);
+				cur.remove(cur.size() - 1);
+				while (pos + 1 < candidates.length && candidates[pos + 1] == candidates[pos])
+					pos++;
+			} else
+				return;
+		}
+	}
+
+	public int maxDistance(List<List<Integer>> arrays) {
+		int max = arrays.get(0).get(arrays.get(0).size() - 1);
+		int min = arrays.get(0).get(0);
+		int result = Integer.MIN_VALUE;
+
+		for (int i = 1; i < arrays.size(); i++) {
+			List<Integer> cur = arrays.get(i);
+			result = Math.max(result, max - cur.get(0));
+			result = Math.max(result, cur.get(cur.size() - 1) - min);
+			max = Math.max(max, cur.get(cur.size() - 1));
+			min = Math.min(min, cur.get(0));
+		}
+
+		return result;
+	}
+
+	public boolean containsNearbyDuplicate(int[] nums, int k) {
+		/** Hash Map */
+		// Map<Integer, Integer> m = new HashMap<>();
+		// for(int i = 0; i < nums.length; i++){
+		// if(m.containsKey(nums[i])){
+		// if(i - m.get(nums[i]) <= k) return true;
+		// }
+		// m.put(nums[i], i);
+		// }
+		//
+		// return false;
+
+		/** Hash Set */
+		Set<Integer> set = new HashSet<>();
+		for (int i = 0; i < nums.length; i++) {
+			if (i >= k)
+				set.remove(nums[i - k - 1]);
+			if (!set.add(nums[i]))
+				return true;
+		}
+		return false;
+	}
+
+	public TreeNode buildTree(int[] preorder, int[] inorder) {
+		if (preorder.length == 0 || preorder.length != inorder.length)
+			return null;
+		return buildTreeHelper(preorder, inorder, 0, 0, preorder.length - 1);
+	}
+
+	private TreeNode buildTreeHelper(int[] preorder, int[] inorder, int prestart, int instart, int inend) {
+		if (prestart >= preorder.length || instart > inend)
+			return null;
+
+		TreeNode root = new TreeNode(preorder[prestart]);
+
+		if (instart == inend)
+			return root;
+
+		int pos = instart;
+		for (; pos <= inend; pos++) {
+			if (inorder[pos] == preorder[prestart])
+				break;
+		}
+
+		root.left = buildTreeHelper(preorder, inorder, prestart + 1, instart, pos - 1);
+		root.right = buildTreeHelper(preorder, inorder, pos - instart + prestart + 1, pos + 1, inend);
+
+		return root;
+	}
+
+	public void merge(int[] nums1, int m, int[] nums2, int n) {
+		int i = m - 1, j = n - 1, k = m + n - 1;
+		while (i >= 0 && j >= 0) {
+			if (nums1[i] < nums2[j])
+				nums1[k--] = nums2[j--];
+			else
+				nums1[k--] = nums1[i--];
+		}
+		while (j >= 0)
+			nums1[k--] = nums2[j--];
+	}
+
+	public TreeNode buildTreeII(int[] inorder, int[] postorder) {
+		return buildTreeIIHelper(inorder, postorder, 0, inorder.length - 1, inorder.length - 1);
+	}
+
+	private TreeNode buildTreeIIHelper(int[] inorder, int[] postorder, int instart, int inend, int postend) {
+		if (postend < 0 || instart > inend)
+			return null;
+
+		TreeNode root = new TreeNode(postorder[postend]);
+		if (instart == inend)
+			return root;
+
+		int pos = instart;
+		for (; pos <= inend; pos++) {
+			if (inorder[pos] == postorder[postend])
+				break;
+		}
+
+		root.left = buildTreeIIHelper(inorder, postorder, instart, pos - 1, postend - inend + pos - 1);
+		root.right = buildTreeIIHelper(inorder, postorder, pos + 1, inend, postend - 1);
+
+		return root;
+	}
+
+	public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+		if (obstacleGrid[0][0] == 1)
+			return 0;
+
+		int n = obstacleGrid[0].length;
+
+		int[] dp = new int[n];
+		for (int i = 0; i < n; i++) {
+			if (obstacleGrid[0][i] == 1)
+				break;
+			dp[i] = 1;
+		}
+
+		for (int layer = 1; layer < obstacleGrid.length; layer++) {
+			if (obstacleGrid[layer][0] == 1)
+				dp[0] = 0;
+
+			for (int i = 1; i < n; i++) {
+				if (obstacleGrid[layer][i - 1] == 0 && obstacleGrid[layer][i] == 0)
+					dp[i] = dp[i] + dp[i - 1];
+				else if (obstacleGrid[layer][i] == 1)
+					dp[i] = 0;
+			}
+		}
+
+		return dp[n - 1];
+	}
+
+	public int[] searchRange(int[] nums, int target) {
+		int l = 0, r = nums.length - 1;
+
+		while (l <= r) {
+			int mid = l + (r - l) / 2;
+			if (nums[mid] < target)
+				l = mid + 1;
+			else if (nums[mid] > target)
+				r = mid - 1;
+			else {
+				l = mid - 1;
+				r = mid + 1;
+				while (l >= 0 && nums[l] == target)
+					l--;
+				while (r < nums.length && nums[r] == target)
+					r++;
+				return new int[] { l + 1, r - 1 };
+			}
+		}
+		return new int[] { -1, -1 };
+	}
+
+	public int threeSumClosest(int[] nums, int target) {
+		Arrays.sort(nums);
+
+		int res = 0;
+
+		if (nums.length < 4) {
+			for (int i : nums)
+				res += i;
+			return res;
+		}
+
+		res = nums[0] + nums[1] + nums[2];
+		for (int i = 0; i < nums.length - 2; i++) {
+			int j = i + 1;
+			int k = nums.length - 1;
+			while (j < k) {
+				int sum = nums[j] + nums[k] + nums[i];
+				if (Math.abs(res - target) > Math.abs(sum - target))
+					res = sum;
+				if (sum < target)
+					j++;
+				else if (sum > target)
+					k--;
+				else
+					return sum;
+			}
+		}
+		return res;
+	}
+
+	public boolean canPlaceFlowers(int[] flowerbed, int n) {
+		for (int i = 0; i < flowerbed.length; i++) {
+			if ((i - 1 < 0 || flowerbed[i - 1] == 0) && flowerbed[i] == 0
+					&& (i + 1 >= flowerbed.length || flowerbed[i + 1] == 0)) {
+				flowerbed[i] = 1;
+				n--;
+			}
+			if (n == 0)
+				return true;
+		}
+		if (n <= 0)
+			return true;
+		return false;
+	}
+
+	public int minSubArrayLen(int s, int[] nums) {
+		if(nums.length == 0) return 0;
+		int i = 0, j = 0;
+		int sum = 0;
+		int min = Integer.MAX_VALUE;
+
+		while (j < nums.length) {
+			sum += nums[j++];
+
+			while (sum >= s) {
+				if(j - i < min) min = j - i;
+				sum -= nums[i++];
+			}
+		}
+		return sum == Integer.MAX_VALUE ? 0 : min;
+	}
 	
-    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
-        List<List<Integer>> res = new ArrayList<>();
-        List<Integer> cur = new ArrayList<Integer>();
-        Arrays.sort(candidates);
-        combinationSum2Helper(candidates, target, 0, cur, res, 0);
-        return res;
-    }
-    
-    private void combinationSum2Helper(int[] candidates, int target, int sum, List<Integer> cur, List<List<Integer>> res, int pos){
-    	if(sum == target) {
-    		res.add(new ArrayList<Integer>(cur));
-    		return;
-    	}
-    	for(; pos < candidates.length; pos++){
-    		if(sum + candidates[pos] <= target){
-    			cur.add(candidates[pos]);
-    			combinationSum2Helper(candidates, target, sum + candidates[pos], cur, res, pos + 1);
-    			cur.remove(cur.size() - 1);
-    			while(pos + 1 < candidates.length && candidates[pos + 1] == candidates[pos]) pos++;
-    		}
-    		else
-    			return;
-    	}
+    public int findUnsortedSubarray(int[] nums) {
+        
     }
 }
