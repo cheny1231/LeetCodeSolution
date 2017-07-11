@@ -2,11 +2,13 @@ package com.cheny.leetCode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
@@ -1245,7 +1247,8 @@ public class Solution {
 	}
 
 	public int minSubArrayLen(int s, int[] nums) {
-		if(nums.length == 0) return 0;
+		if (nums.length == 0)
+			return 0;
 		int i = 0, j = 0;
 		int sum = 0;
 		int min = Integer.MAX_VALUE;
@@ -1254,14 +1257,569 @@ public class Solution {
 			sum += nums[j++];
 
 			while (sum >= s) {
-				if(j - i < min) min = j - i;
+				if (j - i < min)
+					min = j - i;
 				sum -= nums[i++];
 			}
 		}
 		return sum == Integer.MAX_VALUE ? 0 : min;
 	}
-	
-    public int findUnsortedSubarray(int[] nums) {
-        
-    }
+
+	public int findUnsortedSubarray(int[] nums) {
+		int begin = -1, end = -2;
+		int max = nums[0];
+		int min = nums[nums.length - 1];
+
+		for (int i = 1; i < nums.length; i++) {
+			if (nums[i] < max)
+				end = i;
+			if (nums[nums.length - 1 - i] > min)
+				begin = i;
+			max = Math.max(max, nums[i]);
+			min = Math.min(min, nums[nums.length - 1 - i]);
+		}
+
+		return end - begin + 1;
+	}
+
+	public List<Interval> merge(List<Interval> intervals) {
+		if (intervals.size() == 0)
+			return intervals;
+
+		intervals.sort((i1, i2) -> Integer.compare(i1.start, i2.start));
+		int start = intervals.get(0).start;
+		int end = intervals.get(0).end;
+		List<Interval> res = new LinkedList<Interval>();
+
+		for (Interval i : intervals) {
+			if (i.start <= end)
+				end = Math.max(i.end, end);
+			else {
+				res.add(new Interval(start, end));
+				start = i.start;
+				end = i.end;
+			}
+		}
+
+		res.add(new Interval(start, end));
+
+		return res;
+	}
+
+	public boolean canJump(int[] nums) {
+		int i = 0;
+
+		for (int reach = 0; i < nums.length && i <= reach; i++) {
+			reach = Math.max(reach, i + nums[i]);
+		}
+
+		return i >= nums.length;
+	}
+
+	public List<String> summaryRanges(int[] nums) {
+		List<String> res = new LinkedList<>();
+
+		if (nums.length == 0)
+			return res;
+
+		for (int i = 0; i < nums.length; i++) {
+			int a = nums[i];
+
+			while (i + 1 < nums.length && nums[i + 1] - nums[i] == 1) {
+				i++;
+			}
+
+			if (a == nums[i])
+				res.add(a + "");
+			else
+				res.add(a + "->" + nums[i]);
+		}
+
+		return res;
+	}
+
+	public int findMinDifference(List<String> timePoints) {
+		boolean[] times = new boolean[1440];
+		for (String s : timePoints) {
+			String[] strs = s.split(":");
+			int h = Integer.parseInt(strs[0]);
+			int m = Integer.parseInt(strs[1]);
+			if (times[h * 60 + m])
+				return 0;
+			else
+				times[h * 60 + m] = true;
+		}
+
+		int prev = -1440, first = -1, end = -1, res = 1440;
+		for (int i = 0; i < times.length; i++) {
+			if (times[i]) {
+				if (first < 0)
+					first = i;
+				end = Math.max(end, i);
+				res = Math.min(res, i - prev);
+				prev = i;
+			}
+		}
+
+		return Math.min(res, 1440 - end + first);
+	}
+
+	public String reverseStr(String s, int k) {
+		char[] c = s.toCharArray();
+		int i = 0;
+
+		while (i < s.length()) {
+			int j = Math.min(i + k - 1, s.length() - 1);
+			reverse(c, i, j);
+			i += 2 * k;
+		}
+
+		return String.valueOf(c);
+	}
+
+	private void reverse(char[] c, int i, int j) {
+		while (i < j) {
+			char tmp = c[i];
+			c[i++] = c[j];
+			c[j--] = tmp;
+		}
+	}
+
+	private void swap(int[] nums, int i, int j) {
+		int tmp = nums[i];
+		nums[i] = nums[j];
+		nums[j] = tmp;
+	}
+
+	public void nextPermutation(int[] nums) {
+		int i = nums.length - 1;
+
+		while (i > 0 && nums[i] <= nums[i - 1])
+			i--;
+
+		if (i == 0) {
+			Arrays.sort(nums);
+			return;
+		}
+
+		int min = Integer.MAX_VALUE;
+		int ind = i;
+
+		for (int j = i; j < nums.length; j++) {
+			if (nums[j] > nums[i - 1] && nums[j] - nums[i - 1] < min) {
+				min = nums[j] - nums[i - 1];
+				ind = j;
+			}
+		}
+
+		swap(nums, i - 1, ind);
+		Arrays.sort(nums, i, nums.length);
+
+	}
+
+	public List<Integer> majorityElement(int[] nums) {
+		List<Integer> res = new ArrayList<>();
+
+		if (nums.length == 0)
+			return res;
+
+		int maj = nums.length / 3;
+		Map<Integer, Integer> m = new HashMap<>();
+
+		for (int i : nums) {
+			if (m.containsKey(i)) {
+				int cnt = m.get(i);
+				m.put(i, cnt + 1);
+			} else
+				m.put(i, 1);
+		}
+
+		for (Map.Entry<Integer, Integer> entry : m.entrySet()) {
+			if (entry.getValue() > maj)
+				res.add(entry.getKey());
+		}
+
+		return res;
+	}
+
+	public int findPairs(int[] nums, int k) {
+		int res = 0;
+		Arrays.sort(nums);
+
+		for (int i = 0; i < nums.length; i++) {
+			int j = i + 1;
+			while (j < nums.length && nums[j] - nums[i] <= k) {
+				if (nums[j] - nums[i] == k) {
+					res++;
+					break;
+				}
+				j++;
+			}
+			while (i + 1 < nums.length && nums[i + 1] == nums[i])
+				i++;
+		}
+
+		return res;
+	}
+
+	public int thirdMax(int[] nums) {
+		Integer max = null;
+		Integer semax = max;
+		Integer thmax = max;
+
+		for (Integer i : nums) {
+			if (i.equals(max) || i.equals(semax) || i.equals(thmax))
+				continue;
+			if (max == null || i > max) {
+				thmax = semax;
+				semax = max;
+				max = i;
+			} else if (semax == null || (i < max && i > semax)) {
+				thmax = semax;
+				semax = i;
+			} else if (thmax == null || (i < semax && i > thmax)) {
+				thmax = i;
+			}
+		}
+
+		return thmax == null ? max : thmax;
+	}
+
+	private void reverse(int[] c, int i, int j) {
+		while (i < j) {
+			int tmp = c[i];
+			c[i++] = c[j];
+			c[j--] = tmp;
+		}
+	}
+
+	public void rotate(int[] nums, int k) {
+		k = k % nums.length;
+
+		reverse(nums, 0, nums.length - 1);
+		reverse(nums, 0, k - 1);
+		reverse(nums, k, nums.length - 1);
+
+	}
+
+	public int maximumProduct(int[] nums) {
+		Integer max = Integer.MIN_VALUE;
+		Integer semax = Integer.MIN_VALUE;
+		Integer thmax = Integer.MIN_VALUE;
+		Integer min = Integer.MAX_VALUE;
+		Integer semin = Integer.MAX_VALUE;
+
+		for (Integer i : nums) {
+			if (i >= max) {
+				thmax = semax;
+				semax = max;
+				max = i;
+			} else if (i >= semax) {
+				thmax = semax;
+				semax = i;
+			} else if (i >= thmax) {
+				thmax = i;
+			}
+			if (i <= min) {
+				semin = min;
+				min = i;
+			} else if (i <= semin) {
+				semin = i;
+			}
+		}
+
+		return Integer.max(max * semax * thmax, max * min * semin);
+	}
+
+	public void setZeroes(int[][] matrix) {
+		int row = matrix.length;
+		int col = matrix[0].length;
+		boolean[] cols = new boolean[col];
+		boolean[] rows = new boolean[row];
+
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < col; j++) {
+				if (matrix[i][j] == 0) {
+					cols[j] = true;
+					rows[i] = true;
+				}
+			}
+		}
+
+		for (int i = 0; i < row; i++) {
+			if (rows[i])
+				setRowZeroes(matrix, i);
+		}
+
+		for (int i = 0; i < col; i++) {
+			if (cols[i])
+				setColZeroes(matrix, i);
+		}
+	}
+
+	private void setRowZeroes(int[][] matrix, int row) {
+		if (row < matrix.length) {
+			for (int i = 0; i < matrix[0].length; i++) {
+				matrix[row][i] = 0;
+			}
+		}
+	}
+
+	private void setColZeroes(int[][] matrix, int col) {
+		if (col < matrix[0].length) {
+			for (int i = 0; i < matrix.length; i++) {
+				matrix[i][col] = 0;
+			}
+		}
+	}
+
+	public List<List<Integer>> fourSum(int[] nums, int target) {
+		List<List<Integer>> res = new LinkedList<>();
+
+		if (nums.length < 4)
+			return res;
+
+		Arrays.sort(nums);
+
+		if (4 * nums[0] > target || 4 * nums[nums.length - 1] < target)
+			return res;
+
+		fourSumHelper(res, new LinkedList<Integer>(), 0, nums, 0, target);
+
+		return res;
+	}
+
+	private void fourSumHelper(List<List<Integer>> res, List<Integer> cur, int i, int[] nums, int sum, int target) {
+		if (sum == target && cur.size() == 4) {
+			res.add(new LinkedList<Integer>(cur));
+			return;
+		} else if (cur.size() >= 4)
+			return;
+
+		for (; i < nums.length; i++) {
+			if (nums[i] + 3 * nums[nums.length - 1] < target)
+				continue;
+			if (nums[i] + 3 * nums[0] > target)
+				break;
+			sum += nums[i];
+			cur.add(nums[i]);
+			fourSumHelper(res, cur, i + 1, nums, sum, target);
+			sum -= nums[i];
+			cur.remove(cur.size() - 1);
+
+			while (i < nums.length - 1 && nums[i] == nums[i + 1])
+				i++;
+		}
+	}
+
+	public boolean exist(char[][] board, String word) {
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				if (existHelper(board, word, 0, i, j))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean existHelper(char[][] board, String word, int pos, int row, int col) {
+		if (pos == word.length())
+			return true;
+
+		if (row < 0 || row == board.length || col < 0 || col == board[0].length)
+			return false;
+
+		boolean flag;
+
+		if (board[row][col] == word.charAt(pos)) {
+			char c = board[row][col];
+			board[row][col] = 0;
+			flag = existHelper(board, word, pos + 1, row - 1, col) || existHelper(board, word, pos + 1, row, col - 1)
+					|| existHelper(board, word, pos + 1, row + 1, col)
+					|| existHelper(board, word, pos + 1, row, col + 1);
+			board[row][col] = c;
+		} else {
+			return false;
+		}
+
+		return flag;
+	}
+
+	public boolean PredictTheWinner(int[] nums) {
+		return PredictTheWinnerHelper(nums, 0, nums.length - 1, new Integer[nums.length][nums.length]) >= 0;
+	}
+
+	private int PredictTheWinnerHelper(int[] nums, int s, int e, Integer[][] dp) {
+		if (dp[s][e] == null) {
+			dp[s][e] = s == e ? nums[s]
+					: Math.max(nums[e] - PredictTheWinnerHelper(nums, s, e - 1, dp),
+							nums[s] - PredictTheWinnerHelper(nums, s + 1, e, dp));
+		}
+		return dp[s][e];
+	}
+
+	public int maxProfitCooldown(int[] prices) {
+		if (prices.length == 0)
+			return 0;
+
+		int[] s0 = new int[prices.length];
+		int[] s1 = new int[prices.length];
+		int[] s2 = new int[prices.length];
+
+		s1[0] = -prices[0];
+
+		for (int i = 1; i < prices.length; i++) {
+			s0[i] = Math.max(s0[i - 1], s2[i - 1]);
+			s1[i] = Math.max(s0[i - 1] - prices[i], s1[i - 1]);
+			s2[i] = s1[i - 1] + prices[i];
+		}
+
+		return Math.max(s0[prices.length - 1], s2[prices.length - 1]);
+	}
+
+	public int climbStairs(int n) {
+		int[] dp = new int[3];
+
+		dp[0] = 1;
+		dp[1] = 1;
+
+		for (int i = 2; i < n + 1; i++) {
+			dp[2] = dp[0] + dp[1];
+			dp[0] = dp[1];
+			dp[1] = dp[2];
+		}
+
+		return n > 2 ? dp[2] : dp[n];
+	}
+
+	public int rob(int[] nums) {
+		int s1 = 0;
+		int s2 = 0, tmp;
+
+		for (int i = 0; i < nums.length; i++) {
+			tmp = s2;
+			s2 = s1 + nums[i];
+			s1 = Math.max(s1, tmp);
+		}
+
+		return Math.max(s1, s2);
+	}
+
+	public int lengthOfLIS(int[] nums) {
+		int[] dp = new int[nums.length];
+		int len = 0;
+
+		for (int x : nums) {
+			int i = Arrays.binarySearch(dp, 0, len, x);
+			if (i < 0)
+				i = -i - 1;
+			dp[i] = x;
+			if (i == len)
+				len++;
+		}
+
+		return len;
+	}
+
+	public int findMaxForm(String[] strs, int m, int n) {
+		int[][] dp = new int[m + 1][n + 1];
+
+		for (String str : strs) {
+			int ones = 0, zeroes = 0;
+			for (char c : str.toCharArray()) {
+				if (c == '1')
+					ones++;
+				else
+					zeroes++;
+			}
+
+			for (int i = m; i >= zeroes; i--) {
+				for (int j = n; j >= ones; j--) {
+					dp[i][j] = Math.max(dp[i][j], dp[i - zeroes][j - ones] + 1);
+				}
+			}
+		}
+
+		return dp[m][n];
+	}
+
+	public int shoppingOffers(List<Integer> price, List<List<Integer>> special, List<Integer> needs) {
+		int res = Integer.MAX_VALUE;
+
+		for (int i = 0; i < special.size(); i++) {
+			List<Integer> sp = special.get(i);
+			boolean validOffer = true;
+
+			for (int j = 0; j < needs.size(); j++) {
+				int tmp = needs.get(j) - sp.get(j);
+				if (tmp < 0)
+					validOffer = false;
+				needs.set(j, tmp);
+			}
+
+			if (validOffer) {
+				res = Math.min(res, shoppingOffers(price, special, needs) + sp.get(sp.size() - 1));
+			}
+
+			for (int j = 0; j < needs.size(); j++) {
+				int tmp = needs.get(j) + sp.get(j);
+				needs.set(j, tmp);
+			}
+		}
+
+		int cost = 0;
+		for (int j = 0; j < needs.size(); j++) {
+			cost += needs.get(j) * price.get(j);
+		}
+
+		return Math.min(res, cost);
+	}
+
+	public int getMoneyAmount(int n) {
+		int[][] dp = new int[n + 1][n + 1];
+		return getMoneyAmountHelper(dp, 1, n);
+	}
+
+	private int getMoneyAmountHelper(int[][] dp, int i, int j) {
+		if (i >= j)
+			return 0;
+		if (dp[i][j] != 0)
+			return dp[i][j];
+
+		int res = Integer.MAX_VALUE;
+
+		for (int k = i; k <= j; k++) {
+			int tmp = k + Integer.max(getMoneyAmountHelper(dp, i, k - 1), getMoneyAmountHelper(dp, k + 1, j));
+			res = Integer.min(res, tmp);
+		}
+
+		dp[i][j] = res;
+		return res;
+	}
+
+	public int wiggleMaxLength(int[] nums) {
+		if(nums.length <= 1) return nums.length;
+				
+		int k = 0;
+		while(k + 1 < nums.length && nums[k] == nums[k + 1]) k++;
+		
+		if (nums.length - k <= 2)
+			return nums.length - k;
+
+		int prev = nums[k + 1];
+		boolean small = nums[k] < nums[k + 1];
+		int res = 2;
+
+		for (int i = k + 2; i < nums.length; i++) {
+			if ((nums[i] < prev) == small && nums[i] != prev){
+				res++;
+				small = !small;
+			}
+			prev = nums[i];
+		}
+		
+		return res;
+
+	}
+
 }

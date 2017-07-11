@@ -11,15 +11,18 @@ public class Test {
 		int[] prenums = new int[]{1,2,3,4,5,6,7,8,9,10};
 		int[] innums = new int[]{4,3,5,2,6,1,9,8,7,10};
 		int[] postnums = new int[]{4,5,3,6,2,9,8,10,7,1};
-		int[] nums = new int[]{1,0,0,0,1,0,0};
+		int[] nums = new int[]{141,39,196,491,381,157,157,134};
+		String[] timePoints = new String[]{"12:12","00:13"};
 		
 		Tree t1 = new Tree(nums1);
 		Tree t2 = new Tree(nums2);
 		int[][] num = new int[][]{{0,1}};
 		Tree tree = new Tree(nums1);
 		TreeNode root = tree.getRoot();
-		boolean res = solution.canPlaceFlowers(nums, 2);
-//		solution.rotate(num);
+		int res = solution.wiggleMaxLength(nums);
+		
+		
+
 		System.out.println(res);
 	}
 }
