@@ -12,7 +12,7 @@ public class Test {
 		int[] prenums = new int[]{1,2,3,4,5,6,7,8,9,10};
 		int[] innums = new int[]{4,3,5,2,6,1,9,8,7,10};
 		int[] postnums = new int[]{4,5,3,6,2,9,8,10,7,1};
-		int[] nums = new int[]{1,1,8};
+		int[] nums = new int[]{0,0,1,1,2,0};
 		String[] timePoints = new String[]{"bar","foo", "the"};
 		List<String> dict = new LinkedList<>();
 		dict.add("cat");
@@ -26,7 +26,7 @@ public class Test {
 		int[][] num = new int[][]{{-4,-5}};
 		Tree tree = new Tree(nums1);
 		TreeNode root = tree.getRoot();		
-		List<List<String>> res = solution.solveNQueens(3);
+		boolean res = solution.searchII(nums,0);
 		
 //		for(int i = 0; i < 9; i++) {
 //			for(int j = 0; j < 9; j++) {
@@ -34,7 +34,8 @@ public class Test {
 //			}
 //			System.out.println("");
 //		}
-		
+
+
 		System.out.println(res);
 	}
 }

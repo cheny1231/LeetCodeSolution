@@ -2234,7 +2234,7 @@ public class Solution {
 				} else if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
 					dp[i][j] = dp[i - 1][j - 1];
 				} else {
-					dp[i][j] = Math.min(dp[i][j - 1], dp[i - 1][j]) + 1;
+					dp[i][j] = Math.min(Math.min(dp[i][j - 1], dp[i - 1][j]), dp[i - 1][j - 1]) + 1;
 				}
 
 			}
@@ -4211,8 +4211,8 @@ public class Solution {
 		double res = 1;
 		int sign = 1;
 		boolean toAdd = false;
-		
-		if(n == Integer.MIN_VALUE) {
+
+		if (n == Integer.MIN_VALUE) {
 			toAdd = true;
 			n = Integer.MAX_VALUE;
 			sign = -1;
@@ -4232,62 +4232,466 @@ public class Solution {
 			mul += cur;
 			res *= tmp;
 		}
-		
-		if(toAdd) res *= x;
+
+		if (toAdd)
+			res *= x;
 
 		return sign == 1 ? res : 1 / res;
 	}
+
+	public List<List<String>> solveNQueens(int n) {
+		List<List<String>> res = new LinkedList<>();
+		boolean[][] board = new boolean[n][n];
+
+		solveNQueensHelper(res, new LinkedList<>(), board, 0);
+
+		return res;
+	}
+
+	private void solveNQueensHelper(List<List<String>> res, List<String> cur, boolean[][] board, int row) {
+		int n = board.length;
+
+		if (row == n)
+			res.add(new LinkedList<>(cur));
+
+		for (int i = 0; i < n; i++) {
+			if (solveNQueensIsValid(board, row, i)) {
+				board[row][i] = true;
+				String curStr = "";
+				int j = 0;
+				for (; j < i; j++)
+					curStr += ".";
+				curStr += "Q";
+				for (j = i + 1; j < n; j++)
+					curStr += ".";
+				cur.add(curStr);
+				solveNQueensHelper(res, cur, board, row + 1);
+				cur.remove(cur.size() - 1);
+				board[row][i] = false;
+			}
+		}
+	}
+
+	private boolean solveNQueensIsValid(boolean[][] board, int row, int col) {
+		int n = board.length;
+
+		for (int i = 0; i < board.length; i++) {
+			if (board[i][col])
+				return false;
+		}
+
+		int i = 0, j = 0;
+		while (row - i >= 0 && col - j >= 0) {
+			if (board[row - i][col - j])
+				return false;
+			i++;
+			j++;
+		}
+
+		i = 0;
+		j = 0;
+		while (row - i >= 0 && col + j < n) {
+			if (board[row - i][col + j])
+				return false;
+			i++;
+			j++;
+		}
+
+		return true;
+	}
+
+	public List<Integer> spiralOrder(int[][] matrix) {
+		List<Integer> res = new LinkedList<>();
+
+		if (matrix.length == 0)
+			return res;
+
+		int rowStart = 0, colStart = 0;
+		int rowEnd = matrix.length - 1, colEnd = matrix[0].length - 1;
+
+		while (rowStart <= rowEnd && colStart <= colEnd) {
+
+			for (int i = colStart; i <= colEnd; i++) {
+				res.add(matrix[rowStart][i]);
+			}
+			rowStart++;
+			if (rowStart > rowEnd)
+				break;
+
+			for (int i = rowStart; i <= rowEnd; i++) {
+				res.add(matrix[i][colEnd]);
+			}
+			colEnd--;
+			if (colStart > colEnd)
+				break;
+
+			for (int i = colEnd; i >= colStart; i--) {
+				res.add(matrix[rowEnd][i]);
+			}
+			rowEnd--;
+			if (rowStart > rowEnd)
+				break;
+
+			for (int i = rowEnd; i >= rowStart; i--) {
+				res.add(matrix[i][colStart]);
+			}
+			colStart++;
+			if (colStart > colEnd)
+				break;
+		}
+
+		return res;
+	}
+
+	public List<Interval> insert(List<Interval> intervals, Interval newInterval) {
+		List<Interval> res = new LinkedList<>();
+
+		int pos = 0;
+		for (; pos < intervals.size(); pos++) {
+			Interval interval = intervals.get(pos);
+
+			if (newInterval.end < interval.start)
+				break;
+
+			if (newInterval.start > interval.end) {
+				res.add(interval);
+				continue;
+			}
+
+			newInterval.start = Math.min(newInterval.start, interval.start);
+			newInterval.end = Math.max(newInterval.end, interval.end);
+		}
+
+		res.add(newInterval);
+		for (; pos < intervals.size(); pos++) {
+			res.add(intervals.get(pos));
+		}
+
+		return res;
+	}
+
+	public String getPermutation(int n, int k) {
+		boolean[] used = new boolean[n];
+
+		int num = 1;
+		for (int i = n; i > 0; i--) {
+			num *= i;
+		}
+
+		StringBuilder sb = new StringBuilder("");
+
+		k = k - 1;
+
+		while (num >= 1) {
+			if (n == 1)
+				break;
+
+			num /= n;
+			int tmp = k / num;
+			int cnt = 0, ind = 0;
+			while (cnt <= tmp) {
+				if (!used[ind])
+					cnt++;
+				ind++;
+			}
+
+			used[ind - 1] = true;
+
+			sb.append((char) (ind + '0'));
+			n = n - 1;
+			k = k % num;
+		}
+
+		for (int i = 0; i < used.length; i++) {
+			if (!used[i]) {
+				sb.append((char) (i + '1'));
+				break;
+			}
+		}
+
+		return sb.toString();
+	}
+
+	public ListNode rotateRight(ListNode head, int k) {
+		if (head == null)
+			return head;
+
+		ListNode p = head;
+
+		int length = 1;
+		while (p.next != null) {
+			p = p.next;
+			length++;
+		}
+
+		k = k % length;
+		p.next = head;
+
+		for (int i = 0; i < length - k; i++) {
+			p = p.next;
+		}
+
+		ListNode res = p.next;
+		p.next = null;
+
+		return res;
+	}
+
+	public boolean isNumber(String s) {
+		s = s.trim();
+
+		boolean e = false;
+		boolean dot = false;
+		boolean num = false;
+		boolean numAfterE = true;
+
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+
+			if (c == '.') {
+				if (dot || e)
+					return false;
+				dot = true;
+			} else if (c == 'e') {
+				if (e || !num)
+					return false;
+				e = true;
+				numAfterE = false;
+			} else if (c <= '9' && c >= '0') {
+				num = true;
+				numAfterE = true;
+			} else if (c == '-' || c == '+') {
+				if (i != 0 && s.charAt(i - 1) != 'e')
+					return false;
+			} else
+				return false;
+		}
+
+		return num && numAfterE;
+	}
+
+	public List<String> fullJustify(String[] words, int maxWidth) {
+		List<String> res = new LinkedList<>();
+		int start = 0;
+		int end = 0;
+		int length = 0;
+		while (end < words.length) {
+			length = 0;
+			for (int i = start; i < words.length; i++) {
+				if(words[i].isEmpty()) continue;
+				if (length + words[i].length() > maxWidth) {
+					end = i;
+					break;
+				}
+				length += words[i].length();
+				if(length < maxWidth) length++;
+			}
+			
+			if(end - start == 1) {
+				StringBuilder sb = new StringBuilder();
+				sb.append(words[start]);
+				for(int i = 0; i < maxWidth - words[start].length(); i++) sb.append(" ");
+				res.add(sb.toString());
+				continue;
+			}
+			
+			int[] intervals = new int[end - start - 1];
+			int interval = (maxWidth - length) / (end - start - 1) + 1;
+			int difference = length + (interval - 1) * (end - start - 1);
+			for(int i = 0; i < end - start - 1; i++) {
+				if(difference > 0) {
+					intervals[i] = interval + 1;
+					difference--;
+				}
+				else intervals[i] = interval;
+			}
+			
+			StringBuilder sb = new StringBuilder();
+			for (int i = start; i < end - 1; i++) {
+				sb.append(words[i]);
+				for(int j = 0; j < intervals[i]; j++) sb.append(" ");
+			}
+			sb.append(words[end - 1]);
+			
+			start = end;
+		}
+		
+		return res;
+	}
 	
-    public List<List<String>> solveNQueens(int n) {
-        List<List<String>> res = new LinkedList<>();
-        boolean[][] board = new boolean[n][n];
+    public int mySqrt(int x) {
+        if(x == 0) return 0;
+    	
+        int left = 1, right = x;
         
-        solveNQueensHelper(res, new LinkedList<>(), board, 0);
+        while(left < right) {
+        	int mid = (right - left) / 2 + left;
+        	
+        	if(mid < x / mid) left = mid;
+        	else if(mid > x / mid) right = mid;
+        	else return mid;
+        	
+            if(left == (right - left) / 2 + left) break;
+        }
+        
+        return left;
+    }
+    
+    public String simplifyPath(String path) {
+        String[] paths = path.split("\\/");
+        
+        Stack<String> stack = new Stack<>();
+        for(String cur : paths) {
+        	if(cur.equals(".") || cur.isEmpty() || (cur.equals("..") && stack.isEmpty())) continue;
+        	if(cur.equals("..")) stack.pop();
+        	else stack.push(cur);
+        }
+        
+        String res = "";
+        while(!stack.isEmpty()) {
+        	res = "/" + stack.pop() + res;
+        }
+        
+        return res.isEmpty() ? "/" : res;
+    }
+    
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> res = new LinkedList<>();
+        
+        List<Integer> cur = new ArrayList<>(Collections.nCopies(k, 0));
+        
+        int ind = 0;
+        while(ind >= 0) {
+        	cur.set(ind, cur.get(ind) + 1);
+        	if(cur.get(ind) > n) ind--;
+        	else if(ind == k - 1) res.add(new ArrayList<>(cur));
+        	else {
+        		ind++;
+        		cur.set(ind, cur.get(ind - 1));
+        	}
+        }
+        
+        
+        /******Backtracking Solution*******/
+        //combineHelper(res, new LinkedList<>(), n, k, 0);
         
         return res;
     }
     
-    private void solveNQueensHelper(List<List<String>> res, List<String> cur, boolean[][] board, int row) {
-    	int n = board.length;
-    	
-    	if(row == n) res.add(new LinkedList<>(cur));
-    	
-    	for(int i = 0; i < n; i++) {
-    		if(solveNQueensIsValid(board, row, i)) {
-    			board[row][i] = true;
-    			String curStr = "";
-    			int j = 0;
-    			for(; j < i; j++) curStr += ".";
-    			curStr += "Q";
-    			for(j = i + 1; j < n; j++) curStr += ".";
-    			cur.add(curStr);
-    			solveNQueensHelper(res, cur, board, row + 1);
-    			cur.remove(cur.size() - 1);
-    			board[row][i] = false;
-    		}
-    	}
+//    private void combineHelper(List<List<Integer>> res, List<Integer> cur, int n, int k, int pos) {
+//    	if(cur.size() == k) {
+//    		res.add(new LinkedList<>(cur));
+//    		return;
+//    	}
+//    	
+//    	for(; pos < n; pos++) {
+//    		cur.add(pos + 1);
+//    		combineHelper(res, cur, n, k, pos + 1);
+//    		cur.remove(cur.size() - 1);
+//    	}
+//    	
+//    	return;
+//    }
+    
+    public boolean searchII(int[] nums, int target) {
+        if(nums.length == 0) return false;
+        
+        int low = 0, high = nums.length - 1;
+        
+        while(low < high) {
+        	int mid = (high - low) / 2 + low;
+        	
+        	if(mid == low) break;
+        	
+        	if(nums[mid] > nums[low]) low = mid;
+        	else if(nums[mid] < nums[low]) high = mid;
+        	else low++;
+        }
+        
+        int min = high;
+        
+        if(target == nums[0]) return true;
+        
+        if(target > nums[0]) {
+        	low = 0;
+        	high = (min - 1 > 0) ? min : nums.length - 1;
+        } else {
+        	low = min;
+        	high = nums.length - 1;
+        }
+        
+        while(low <= high) {
+        	int mid = (high - low) / 2 + low;
+        	
+        	if(nums[mid] > target) high = mid - 1;
+        	else if(nums[mid] < target) low = mid + 1;
+        	else return true;
+        }
+        
+        return high >= 0 && nums[high] == target;
+        
     }
     
-    private boolean solveNQueensIsValid(boolean[][] board, int row, int col) {
-    	int n = board.length;
+    public ListNode deleteDuplicatesII(ListNode head) {
+        boolean dup = false;
+        
+        ListNode fakeHead = new ListNode(0);
+        fakeHead.next = head;
+        
+        ListNode p = fakeHead;
+        
+        while(p.next != null) {
+        	if(p.next.next == null || p.next.val != p.next.next.val) p = p.next;
+        	else {
+        		dup = true;
+        		while(dup) {
+            		if(p.next.next == null || p.next.val != p.next.next.val) dup = false;
+            		p.next = p.next.next;
+            	}
+        	}
+        }
+        
+        return fakeHead.next;
+    }
+    
+    public ListNode deleteDuplicates(ListNode head) {
+    	if(head == null) return head;
     	
-    	for(int i = 0; i < board.length; i++) {
-    		if(board[i][col]) return false;
-    	}
-    	
-    	int i = 0, j = 0;
-    	while(row - i >= 0 && col - j >= 0) {
-    		if(board[row - i][col - j]) return false;
-    		i++; j++;
-    	}
-    	
-    	i = 0; j = 0;
-    	while(row - i >= 0 && col + j < n) {
-    		if(board[row - i][col + j]) return false;
-    		i++; j++;
-    	}
-    	
-    	return true;
+        ListNode p = head;
+        
+        while(p.next != null) {
+        	if(p.val != p.next.val) p = p.next;
+        	else p.next = p.next.next;
+        }
+        
+        return head;
+    }
+    
+    public int largestRectangleArea(int[] heights) {
+        int maxArea = 0;
+        Stack<Integer> stack = new Stack<>();
+        
+        for(int i = 0; i <= heights.length; i++) {
+        	int h = (i == heights.length) ? 0 : heights[i];
+        	
+        	if(stack.isEmpty() || h >= heights[stack.peek()]) stack.push(i);
+        	else {
+        		int top = stack.pop();
+        		maxArea = Math.max(maxArea, heights[top] * (stack.isEmpty() ? i : i - 1 - stack.peek()));
+        		i--;
+        	}
+        }
+        
+        return maxArea;
+    }
+    
+    public int maximalRectangle(char[][] matrix) {
+    	int m = matrix.length;
+    	if(m == 0) return 0;
+    	int n = matrix[0].length;
+
+
+    
     }
 
 }
