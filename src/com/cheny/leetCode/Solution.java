@@ -4478,220 +4478,469 @@ public class Solution {
 		while (end < words.length) {
 			length = 0;
 			for (int i = start; i < words.length; i++) {
-				if(words[i].isEmpty()) continue;
+				if (words[i].isEmpty())
+					continue;
 				if (length + words[i].length() > maxWidth) {
 					end = i;
 					break;
 				}
 				length += words[i].length();
-				if(length < maxWidth) length++;
+				if (length < maxWidth)
+					length++;
 			}
-			
-			if(end - start == 1) {
+
+			if (end - start == 1) {
 				StringBuilder sb = new StringBuilder();
 				sb.append(words[start]);
-				for(int i = 0; i < maxWidth - words[start].length(); i++) sb.append(" ");
+				for (int i = 0; i < maxWidth - words[start].length(); i++)
+					sb.append(" ");
 				res.add(sb.toString());
 				continue;
 			}
-			
+
 			int[] intervals = new int[end - start - 1];
 			int interval = (maxWidth - length) / (end - start - 1) + 1;
 			int difference = length + (interval - 1) * (end - start - 1);
-			for(int i = 0; i < end - start - 1; i++) {
-				if(difference > 0) {
+			for (int i = 0; i < end - start - 1; i++) {
+				if (difference > 0) {
 					intervals[i] = interval + 1;
 					difference--;
-				}
-				else intervals[i] = interval;
+				} else
+					intervals[i] = interval;
 			}
-			
+
 			StringBuilder sb = new StringBuilder();
 			for (int i = start; i < end - 1; i++) {
 				sb.append(words[i]);
-				for(int j = 0; j < intervals[i]; j++) sb.append(" ");
+				for (int j = 0; j < intervals[i]; j++)
+					sb.append(" ");
 			}
 			sb.append(words[end - 1]);
-			
+
 			start = end;
 		}
-		
+
 		return res;
 	}
-	
-    public int mySqrt(int x) {
-        if(x == 0) return 0;
-    	
-        int left = 1, right = x;
+
+	public int mySqrt(int x) {
+		if (x == 0)
+			return 0;
+
+		int left = 1, right = x;
+
+		while (left < right) {
+			int mid = (right - left) / 2 + left;
+
+			if (mid < x / mid)
+				left = mid;
+			else if (mid > x / mid)
+				right = mid;
+			else
+				return mid;
+
+			if (left == (right - left) / 2 + left)
+				break;
+		}
+
+		return left;
+	}
+
+	public String simplifyPath(String path) {
+		String[] paths = path.split("\\/");
+
+		Stack<String> stack = new Stack<>();
+		for (String cur : paths) {
+			if (cur.equals(".") || cur.isEmpty() || (cur.equals("..") && stack.isEmpty()))
+				continue;
+			if (cur.equals(".."))
+				stack.pop();
+			else
+				stack.push(cur);
+		}
+
+		String res = "";
+		while (!stack.isEmpty()) {
+			res = "/" + stack.pop() + res;
+		}
+
+		return res.isEmpty() ? "/" : res;
+	}
+
+	public List<List<Integer>> combine(int n, int k) {
+		List<List<Integer>> res = new LinkedList<>();
+
+		List<Integer> cur = new ArrayList<>(Collections.nCopies(k, 0));
+
+		int ind = 0;
+		while (ind >= 0) {
+			cur.set(ind, cur.get(ind) + 1);
+			if (cur.get(ind) > n)
+				ind--;
+			else if (ind == k - 1)
+				res.add(new ArrayList<>(cur));
+			else {
+				ind++;
+				cur.set(ind, cur.get(ind - 1));
+			}
+		}
+
+		/****** Backtracking Solution *******/
+		// combineHelper(res, new LinkedList<>(), n, k, 0);
+
+		return res;
+	}
+
+	// private void combineHelper(List<List<Integer>> res, List<Integer> cur,
+	// int n, int k, int pos) {
+	// if(cur.size() == k) {
+	// res.add(new LinkedList<>(cur));
+	// return;
+	// }
+	//
+	// for(; pos < n; pos++) {
+	// cur.add(pos + 1);
+	// combineHelper(res, cur, n, k, pos + 1);
+	// cur.remove(cur.size() - 1);
+	// }
+	//
+	// return;
+	// }
+
+	public boolean searchII(int[] nums, int target) {
+		if (nums.length == 0)
+			return false;
+
+		int low = 0, high = nums.length - 1;
+
+		while (low < high) {
+			int mid = (high - low) / 2 + low;
+
+			if (mid == low)
+				break;
+
+			if (nums[mid] > nums[low])
+				low = mid;
+			else if (nums[mid] < nums[low])
+				high = mid;
+			else
+				low++;
+		}
+
+		int min = high;
+
+		if (target == nums[0])
+			return true;
+
+		if (target > nums[0]) {
+			low = 0;
+			high = (min - 1 > 0) ? min : nums.length - 1;
+		} else {
+			low = min;
+			high = nums.length - 1;
+		}
+
+		while (low <= high) {
+			int mid = (high - low) / 2 + low;
+
+			if (nums[mid] > target)
+				high = mid - 1;
+			else if (nums[mid] < target)
+				low = mid + 1;
+			else
+				return true;
+		}
+
+		return high >= 0 && nums[high] == target;
+
+	}
+
+	public ListNode deleteDuplicatesII(ListNode head) {
+		boolean dup = false;
+
+		ListNode fakeHead = new ListNode(0);
+		fakeHead.next = head;
+
+		ListNode p = fakeHead;
+
+		while (p.next != null) {
+			if (p.next.next == null || p.next.val != p.next.next.val)
+				p = p.next;
+			else {
+				dup = true;
+				while (dup) {
+					if (p.next.next == null || p.next.val != p.next.next.val)
+						dup = false;
+					p.next = p.next.next;
+				}
+			}
+		}
+
+		return fakeHead.next;
+	}
+
+	public ListNode deleteDuplicates(ListNode head) {
+		if (head == null)
+			return head;
+
+		ListNode p = head;
+
+		while (p.next != null) {
+			if (p.val != p.next.val)
+				p = p.next;
+			else
+				p.next = p.next.next;
+		}
+
+		return head;
+	}
+
+	public int largestRectangleArea(int[] heights) {
+		int maxArea = 0;
+		Stack<Integer> stack = new Stack<>();
+
+		for (int i = 0; i <= heights.length; i++) {
+			int h = (i == heights.length) ? 0 : heights[i];
+
+			if (stack.isEmpty() || h >= heights[stack.peek()])
+				stack.push(i);
+			else {
+				int top = stack.pop();
+				maxArea = Math.max(maxArea, heights[top] * (stack.isEmpty() ? i : i - 1 - stack.peek()));
+				i--;
+			}
+		}
+
+		return maxArea;
+	}
+
+	public int maximalRectangle(char[][] matrix) {
+		int m = matrix.length;
+		if (m == 0)
+			return 0;
+		int n = matrix[0].length;
+
+		int[] left = new int[n];
+		int[] right = new int[n];
+		int[] height = new int[n];
+
+		for (int i = 0; i < n; i++) {
+			right[i] = n;
+		}
+
+		int maxArea = 0;
+
+		for (int i = 0; i < m; i++) {
+			int curLeft = 0, curRight = n;
+
+			for (int j = 0; j < n; j++) {
+				if (matrix[i][j] == '1')
+					height[j]++;
+				else
+					height[j] = 0;
+			}
+
+			for (int j = 0; j < n; j++) {
+				if (matrix[i][j] == '1')
+					left[j] = Math.max(left[j], curLeft);
+				else {
+					left[j] = 0;
+					curLeft = j + 1;
+				}
+			}
+
+			for (int j = n - 1; j >= 0; j--) {
+				if (matrix[i][j] == '1')
+					right[j] = Math.min(right[j], curRight);
+				else {
+					right[j] = n;
+					curRight = j;
+				}
+			}
+
+			for (int j = 0; j < n; j++) {
+				maxArea = Math.max(maxArea, height[j] * (right[j] - left[j]));
+			}
+		}
+
+		return maxArea;
+	}
+
+	public ListNode partition(ListNode head, int x) {
+		ListNode dummyHead = new ListNode(0);
+		dummyHead.next = head;
+
+		ListNode left = dummyHead;
+		ListNode cur = dummyHead;
+
+		while (cur != null && cur.next != null) {
+			if (cur.next.val < x) {
+				if (cur != left) {
+					ListNode tmp = cur.next;
+					cur.next = cur.next.next;
+					tmp.next = left.next;
+					left.next = tmp;
+				}
+				else cur = cur.next;
+				left = left.next;
+			}
+			else cur = cur.next;
+		}
+
+		return dummyHead.next;
+	}
+
+    /*******Problem 89********/
+    public List<Integer> grayCode(int n) {
+        int num = 1 << n;
+        boolean[] used = new boolean[num];
+        used[0] = true;
         
-        while(left < right) {
-        	int mid = (right - left) / 2 + left;
-        	
-        	if(mid < x / mid) left = mid;
-        	else if(mid > x / mid) right = mid;
-        	else return mid;
-        	
-            if(left == (right - left) / 2 + left) break;
-        }
+        List<Integer> res = new LinkedList<>();
+        res.add(0);
         
-        return left;
-    }
-    
-    public String simplifyPath(String path) {
-        String[] paths = path.split("\\/");
-        
-        Stack<String> stack = new Stack<>();
-        for(String cur : paths) {
-        	if(cur.equals(".") || cur.isEmpty() || (cur.equals("..") && stack.isEmpty())) continue;
-        	if(cur.equals("..")) stack.pop();
-        	else stack.push(cur);
-        }
-        
-        String res = "";
-        while(!stack.isEmpty()) {
-        	res = "/" + stack.pop() + res;
-        }
-        
-        return res.isEmpty() ? "/" : res;
-    }
-    
-    public List<List<Integer>> combine(int n, int k) {
-        List<List<Integer>> res = new LinkedList<>();
-        
-        List<Integer> cur = new ArrayList<>(Collections.nCopies(k, 0));
-        
-        int ind = 0;
-        while(ind >= 0) {
-        	cur.set(ind, cur.get(ind) + 1);
-        	if(cur.get(ind) > n) ind--;
-        	else if(ind == k - 1) res.add(new ArrayList<>(cur));
-        	else {
-        		ind++;
-        		cur.set(ind, cur.get(ind - 1));
-        	}
-        }
-        
-        
-        /******Backtracking Solution*******/
-        //combineHelper(res, new LinkedList<>(), n, k, 0);
+        grayCodeHelper(res, num, 0, n, used);
         
         return res;
     }
     
-//    private void combineHelper(List<List<Integer>> res, List<Integer> cur, int n, int k, int pos) {
-//    	if(cur.size() == k) {
-//    		res.add(new LinkedList<>(cur));
-//    		return;
-//    	}
-//    	
-//    	for(; pos < n; pos++) {
-//    		cur.add(pos + 1);
-//    		combineHelper(res, cur, n, k, pos + 1);
-//    		cur.remove(cur.size() - 1);
-//    	}
-//    	
-//    	return;
-//    }
-    
-    public boolean searchII(int[] nums, int target) {
-        if(nums.length == 0) return false;
-        
-        int low = 0, high = nums.length - 1;
-        
-        while(low < high) {
-        	int mid = (high - low) / 2 + low;
-        	
-        	if(mid == low) break;
-        	
-        	if(nums[mid] > nums[low]) low = mid;
-        	else if(nums[mid] < nums[low]) high = mid;
-        	else low++;
-        }
-        
-        int min = high;
-        
-        if(target == nums[0]) return true;
-        
-        if(target > nums[0]) {
-        	low = 0;
-        	high = (min - 1 > 0) ? min : nums.length - 1;
-        } else {
-        	low = min;
-        	high = nums.length - 1;
-        }
-        
-        while(low <= high) {
-        	int mid = (high - low) / 2 + low;
-        	
-        	if(nums[mid] > target) high = mid - 1;
-        	else if(nums[mid] < target) low = mid + 1;
-        	else return true;
-        }
-        
-        return high >= 0 && nums[high] == target;
-        
+
+    private boolean grayCodeHelper(List<Integer> res, int num, int prev, int n, boolean[] used) {
+    	if(res.size() == num) return true;
+    	
+    	int mask = 1;
+    	
+    	for(int i = 0; i < n; i++) {
+    		int cur = prev ^ mask;
+    		if(!used[cur]) {
+    			res.add(cur);
+    			used[cur] = true;
+    			if(grayCodeHelper(res, num, cur, n, used)) return true;
+    			res.remove(res.size() - 1);
+    			used[cur] = false;
+    		}
+    		mask <<= 1;
+    	}
+    	
+    	return false;
     }
     
-    public ListNode deleteDuplicatesII(ListNode head) {
-        boolean dup = false;
+    /*******Problem 92********/
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+    	if(head == null) return null;
+    	
+        ListNode dummyHead = new ListNode(0);
+        dummyHead.next = head;
+        ListNode start = dummyHead;
         
-        ListNode fakeHead = new ListNode(0);
-        fakeHead.next = head;
+        for(int i = 0; i < m - 1; i++) 
+        	start = start.next;
         
-        ListNode p = fakeHead;
+        ListNode p = start.next;
+        ListNode end = p.next;
         
-        while(p.next != null) {
-        	if(p.next.next == null || p.next.val != p.next.next.val) p = p.next;
-        	else {
-        		dup = true;
-        		while(dup) {
-            		if(p.next.next == null || p.next.val != p.next.next.val) dup = false;
-            		p.next = p.next.next;
-            	}
+        for(int i = 0; i < n - m; i++) {
+        	p.next = end.next;
+        	end.next = start.next;
+        	start.next = end;
+        	end = p.next;
+        }
+        
+        return dummyHead.next;
+    }
+    
+    /*******Problem 98********/
+    public boolean isValidBST(TreeNode root) {
+        if(root == null) return true;
+
+        return isValidBSTHelper(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+    
+    private boolean isValidBSTHelper(TreeNode root, long left, long right) {
+        if(root == null) return true;        
+        
+        if(root.left != null && (root.left.val >= root.val || root.left.val <= left)) return false;
+    	if(root.right != null && (root.right.val <= root.val || root.right.val >= right)) return false;
+        
+        return isValidBSTHelper(root.left, left, root.val) && isValidBSTHelper(root.right, root.val, right);
+    }
+    
+    /*******Problem 103********/
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+    	List<List<Integer>> res = new LinkedList<>();
+    	if(root == null) return res;
+    	
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
+        
+        
+        int layer = 0;
+        
+        while(!stack.isEmpty()) {
+        	layer++;
+        	int size = stack.size();
+        	List<Integer> curList = new LinkedList<>();
+        	Stack<TreeNode> newStack = new Stack<>();
+        	for(int i = 0; i < size; i++) {
+        		TreeNode cur = stack.pop();
+        		if(layer % 2 == 0) {
+        			if(cur.right != null) newStack.push(cur.right);
+        			if(cur.left != null) newStack.push(cur.left);
+        		} else {
+        			if(cur.left != null) newStack.push(cur.left);
+        			if(cur.right != null) newStack.push(cur.right);
+        		}
+        		curList.add(cur.val);
         	}
+        	res.add(curList);
+        	stack = newStack;
         }
         
-        return fakeHead.next;
+        return res;
     }
     
-    public ListNode deleteDuplicates(ListNode head) {
-    	if(head == null) return head;
+    /*******Problem 109********/
+    public TreeNode sortedListToBST(ListNode head) {
+    	if(head == null) return null;
+    	if(head.next == null) return new TreeNode(head.val);
     	
         ListNode p = head;
         
-        while(p.next != null) {
-        	if(p.val != p.next.val) p = p.next;
-        	else p.next = p.next.next;
+        int len = 0;
+        while(p != null) {
+        	p = p.next;
+        	len++;
         }
         
-        return head;
-    }
-    
-    public int largestRectangleArea(int[] heights) {
-        int maxArea = 0;
-        Stack<Integer> stack = new Stack<>();
-        
-        for(int i = 0; i <= heights.length; i++) {
-        	int h = (i == heights.length) ? 0 : heights[i];
-        	
-        	if(stack.isEmpty() || h >= heights[stack.peek()]) stack.push(i);
-        	else {
-        		int top = stack.pop();
-        		maxArea = Math.max(maxArea, heights[top] * (stack.isEmpty() ? i : i - 1 - stack.peek()));
-        		i--;
-        	}
+        p = head;
+        for(int i = 0; i < len / 2 - 1; i++) {
+        	p = p.next;
         }
         
-        return maxArea;
+        TreeNode root = new TreeNode(p.next.val);
+        ListNode right = p.next.next;
+        p.next = null;
+        root.left = sortedListToBST(head);
+        root.right = sortedListToBST(right);
+        
+        return root;
     }
     
-    public int maximalRectangle(char[][] matrix) {
-    	int m = matrix.length;
-    	if(m == 0) return 0;
-    	int n = matrix[0].length;
-
-
-    
+    /*******Problem 110********/
+    public boolean isBalanced(TreeNode root) {
+        
+        return isBalancedDFSHeight(root) >= 0;
     }
-
+    
+    private int isBalancedDFSHeight(TreeNode root) {
+    	if(root == null) return 0;
+    	
+    	int left = isBalancedDFSHeight(root.left);
+    	if(left == -1) return -1;
+    	int right = isBalancedDFSHeight(root.right);
+    	if(right == -1) return -1;
+    	
+    	if(Math.abs(left - right) < 2) return Math.max(left, right) + 1;
+    	else return -1;
+    }
 }

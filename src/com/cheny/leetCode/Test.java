@@ -26,7 +26,12 @@ public class Test {
 		int[][] num = new int[][]{{-4,-5}};
 		Tree tree = new Tree(nums1);
 		TreeNode root = tree.getRoot();		
-		boolean res = solution.searchII(nums,0);
+		
+		ListNode head = new ListNode(1);
+		head.next = new ListNode(2);
+		head.next.next = new ListNode(3);
+		
+		ListNode res = solution.reverseBetween(head, 1, 2);
 		
 //		for(int i = 0; i < 9; i++) {
 //			for(int j = 0; j < 9; j++) {
