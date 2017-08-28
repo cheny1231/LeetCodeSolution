@@ -4780,167 +4780,261 @@ public class Solution {
 					cur.next = cur.next.next;
 					tmp.next = left.next;
 					left.next = tmp;
-				}
-				else cur = cur.next;
+				} else
+					cur = cur.next;
 				left = left.next;
-			}
-			else cur = cur.next;
+			} else
+				cur = cur.next;
 		}
 
 		return dummyHead.next;
 	}
 
-    /*******Problem 89********/
-    public List<Integer> grayCode(int n) {
-        int num = 1 << n;
-        boolean[] used = new boolean[num];
-        used[0] = true;
-        
-        List<Integer> res = new LinkedList<>();
-        res.add(0);
-        
-        grayCodeHelper(res, num, 0, n, used);
-        
-        return res;
-    }
-    
+	/******* Problem 89 ********/
+	public List<Integer> grayCode(int n) {
+		int num = 1 << n;
+		boolean[] used = new boolean[num];
+		used[0] = true;
 
-    private boolean grayCodeHelper(List<Integer> res, int num, int prev, int n, boolean[] used) {
-    	if(res.size() == num) return true;
-    	
-    	int mask = 1;
-    	
-    	for(int i = 0; i < n; i++) {
-    		int cur = prev ^ mask;
-    		if(!used[cur]) {
-    			res.add(cur);
-    			used[cur] = true;
-    			if(grayCodeHelper(res, num, cur, n, used)) return true;
-    			res.remove(res.size() - 1);
-    			used[cur] = false;
-    		}
-    		mask <<= 1;
-    	}
-    	
-    	return false;
-    }
-    
-    /*******Problem 92********/
-    public ListNode reverseBetween(ListNode head, int m, int n) {
-    	if(head == null) return null;
-    	
-        ListNode dummyHead = new ListNode(0);
-        dummyHead.next = head;
-        ListNode start = dummyHead;
-        
-        for(int i = 0; i < m - 1; i++) 
-        	start = start.next;
-        
-        ListNode p = start.next;
-        ListNode end = p.next;
-        
-        for(int i = 0; i < n - m; i++) {
-        	p.next = end.next;
-        	end.next = start.next;
-        	start.next = end;
-        	end = p.next;
-        }
-        
-        return dummyHead.next;
-    }
-    
-    /*******Problem 98********/
-    public boolean isValidBST(TreeNode root) {
-        if(root == null) return true;
+		List<Integer> res = new LinkedList<>();
+		res.add(0);
 
-        return isValidBSTHelper(root, Long.MIN_VALUE, Long.MAX_VALUE);
-    }
-    
-    private boolean isValidBSTHelper(TreeNode root, long left, long right) {
-        if(root == null) return true;        
-        
-        if(root.left != null && (root.left.val >= root.val || root.left.val <= left)) return false;
-    	if(root.right != null && (root.right.val <= root.val || root.right.val >= right)) return false;
-        
-        return isValidBSTHelper(root.left, left, root.val) && isValidBSTHelper(root.right, root.val, right);
-    }
-    
-    /*******Problem 103********/
-    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
-    	List<List<Integer>> res = new LinkedList<>();
-    	if(root == null) return res;
-    	
-        Stack<TreeNode> stack = new Stack<>();
-        stack.push(root);
-        
-        
-        int layer = 0;
-        
-        while(!stack.isEmpty()) {
-        	layer++;
-        	int size = stack.size();
-        	List<Integer> curList = new LinkedList<>();
-        	Stack<TreeNode> newStack = new Stack<>();
-        	for(int i = 0; i < size; i++) {
-        		TreeNode cur = stack.pop();
-        		if(layer % 2 == 0) {
-        			if(cur.right != null) newStack.push(cur.right);
-        			if(cur.left != null) newStack.push(cur.left);
-        		} else {
-        			if(cur.left != null) newStack.push(cur.left);
-        			if(cur.right != null) newStack.push(cur.right);
-        		}
-        		curList.add(cur.val);
-        	}
-        	res.add(curList);
-        	stack = newStack;
-        }
-        
-        return res;
-    }
-    
-    /*******Problem 109********/
-    public TreeNode sortedListToBST(ListNode head) {
-    	if(head == null) return null;
-    	if(head.next == null) return new TreeNode(head.val);
-    	
-        ListNode p = head;
-        
-        int len = 0;
-        while(p != null) {
-        	p = p.next;
-        	len++;
-        }
-        
-        p = head;
-        for(int i = 0; i < len / 2 - 1; i++) {
-        	p = p.next;
-        }
-        
-        TreeNode root = new TreeNode(p.next.val);
-        ListNode right = p.next.next;
-        p.next = null;
-        root.left = sortedListToBST(head);
-        root.right = sortedListToBST(right);
-        
-        return root;
-    }
-    
-    /*******Problem 110********/
-    public boolean isBalanced(TreeNode root) {
-        
-        return isBalancedDFSHeight(root) >= 0;
-    }
-    
-    private int isBalancedDFSHeight(TreeNode root) {
-    	if(root == null) return 0;
-    	
-    	int left = isBalancedDFSHeight(root.left);
-    	if(left == -1) return -1;
-    	int right = isBalancedDFSHeight(root.right);
-    	if(right == -1) return -1;
-    	
-    	if(Math.abs(left - right) < 2) return Math.max(left, right) + 1;
-    	else return -1;
-    }
+		grayCodeHelper(res, num, 0, n, used);
+
+		return res;
+	}
+
+	private boolean grayCodeHelper(List<Integer> res, int num, int prev, int n, boolean[] used) {
+		if (res.size() == num)
+			return true;
+
+		int mask = 1;
+
+		for (int i = 0; i < n; i++) {
+			int cur = prev ^ mask;
+			if (!used[cur]) {
+				res.add(cur);
+				used[cur] = true;
+				if (grayCodeHelper(res, num, cur, n, used))
+					return true;
+				res.remove(res.size() - 1);
+				used[cur] = false;
+			}
+			mask <<= 1;
+		}
+
+		return false;
+	}
+
+	/******* Problem 92 ********/
+	public ListNode reverseBetween(ListNode head, int m, int n) {
+		if (head == null)
+			return null;
+
+		ListNode dummyHead = new ListNode(0);
+		dummyHead.next = head;
+		ListNode start = dummyHead;
+
+		for (int i = 0; i < m - 1; i++)
+			start = start.next;
+
+		ListNode p = start.next;
+		ListNode end = p.next;
+
+		for (int i = 0; i < n - m; i++) {
+			p.next = end.next;
+			end.next = start.next;
+			start.next = end;
+			end = p.next;
+		}
+
+		return dummyHead.next;
+	}
+
+	/******* Problem 98 ********/
+	public boolean isValidBST(TreeNode root) {
+		if (root == null)
+			return true;
+
+		return isValidBSTHelper(root, Long.MIN_VALUE, Long.MAX_VALUE);
+	}
+
+	private boolean isValidBSTHelper(TreeNode root, long left, long right) {
+		if (root == null)
+			return true;
+
+		if (root.left != null && (root.left.val >= root.val || root.left.val <= left))
+			return false;
+		if (root.right != null && (root.right.val <= root.val || root.right.val >= right))
+			return false;
+
+		return isValidBSTHelper(root.left, left, root.val) && isValidBSTHelper(root.right, root.val, right);
+	}
+
+	/******* Problem 103 ********/
+	public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+		List<List<Integer>> res = new LinkedList<>();
+		if (root == null)
+			return res;
+
+		Stack<TreeNode> stack = new Stack<>();
+		stack.push(root);
+
+		int layer = 0;
+
+		while (!stack.isEmpty()) {
+			layer++;
+			int size = stack.size();
+			List<Integer> curList = new LinkedList<>();
+			Stack<TreeNode> newStack = new Stack<>();
+			for (int i = 0; i < size; i++) {
+				TreeNode cur = stack.pop();
+				if (layer % 2 == 0) {
+					if (cur.right != null)
+						newStack.push(cur.right);
+					if (cur.left != null)
+						newStack.push(cur.left);
+				} else {
+					if (cur.left != null)
+						newStack.push(cur.left);
+					if (cur.right != null)
+						newStack.push(cur.right);
+				}
+				curList.add(cur.val);
+			}
+			res.add(curList);
+			stack = newStack;
+		}
+
+		return res;
+	}
+
+	/******* Problem 109 ********/
+	public TreeNode sortedListToBST(ListNode head) {
+		if (head == null)
+			return null;
+		if (head.next == null)
+			return new TreeNode(head.val);
+
+		ListNode p = head;
+
+		int len = 0;
+		while (p != null) {
+			p = p.next;
+			len++;
+		}
+
+		p = head;
+		for (int i = 0; i < len / 2 - 1; i++) {
+			p = p.next;
+		}
+
+		TreeNode root = new TreeNode(p.next.val);
+		ListNode right = p.next.next;
+		p.next = null;
+		root.left = sortedListToBST(head);
+		root.right = sortedListToBST(right);
+
+		return root;
+	}
+
+	/******* Problem 110 ********/
+	public boolean isBalanced(TreeNode root) {
+
+		return isBalancedDFSHeight(root) >= 0;
+	}
+
+	private int isBalancedDFSHeight(TreeNode root) {
+		if (root == null)
+			return 0;
+
+		int left = isBalancedDFSHeight(root.left);
+		if (left == -1)
+			return -1;
+		int right = isBalancedDFSHeight(root.right);
+		if (right == -1)
+			return -1;
+
+		if (Math.abs(left - right) < 2)
+			return Math.max(left, right) + 1;
+		else
+			return -1;
+	}
+
+	/******* Problem 111 ********/
+	public int minDepth(TreeNode root) {
+		if (root == null)
+			return 0;
+
+		Queue<TreeNode> queue = new LinkedList<>();
+		queue.add(root);
+
+		int depth = 0;
+
+		while (!queue.isEmpty()) {
+			int size = queue.size();
+			depth++;
+
+			for (int i = 0; i < size; i++) {
+				TreeNode cur = queue.poll();
+				if (cur.left == null && cur.right == null)
+					return depth;
+				if (cur.left != null)
+					queue.add(cur.left);
+				if (cur.right != null)
+					queue.add(cur.right);
+			}
+		}
+
+		return depth;
+	}
+
+	/******* Problem 112 ********/
+	public boolean hasPathSum(TreeNode root, int sum) {
+		if (root == null)
+			return false;
+
+		return hasPathSumHelper(root, sum, root.val);
+	}
+
+	private boolean hasPathSumHelper(TreeNode root, int sum, int cur) {
+		if (root.left == null && root.right == null && cur == sum)
+			return true;
+
+		boolean left = false, right = false;
+
+		if (root.left != null)
+			left = hasPathSumHelper(root.left, sum, cur + root.left.val);
+		if (root.right != null)
+			right = hasPathSumHelper(root.right, sum, cur + root.right.val);
+
+		return left || right;
+	}
+
+	/******* Problem 113 ********/
+	public List<List<Integer>> pathSumII(TreeNode root, int sum) {
+		List<List<Integer>> res = new LinkedList<>();
+
+		if (root != null) {
+			List<Integer> cur = new LinkedList<>();
+			pathSumIIHelper(res, cur, root, sum);
+		}
+		return res;
+	}
+
+	private void pathSumIIHelper(List<List<Integer>> res, List<Integer> cur, TreeNode root, int sum) {
+		if (root == null)
+			return;
+
+		cur.add(root.val);
+
+		if (root.left == null && root.right == null && sum == root.val)
+			res.add(new LinkedList<>(cur));
+		else {
+			pathSumIIHelper(res, cur, root.left, sum - root.val);
+			pathSumIIHelper(res, cur, root.right, sum - root.val);
+		}
+
+		cur.remove(cur.size() - 1);
+	}
 }
